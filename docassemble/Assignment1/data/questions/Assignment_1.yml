@@ -51,23 +51,25 @@ mandatory: True
 code: |
   if own_property:
     if more_than_one_property:
+      error_message = "You do not qualify for legal aid, because you own more than one property."
       ineligible_screen
     else:
       if not own_residency:
+        error_message = "You do not qualify for legal aid, because your property is not used by you as your place of residence."
         ineligible_screen
       else:
         if property_value > 13000:
+          error_message = "You do not qualify for legal aid, because your property's annual value is more than $13000."
           ineligible_screen
+  total_savings_and_investments = bank_account_savings + cpf_savings + other_investments
+  if applicant.age_in_years() < 60 and total_savings_and_investments > 10000:
+    error_message = "You do not qualify for legal aid, because your savings is more than $10000."
+    ineligible_screen
+  if applicant.age_in_years() >= 60 and total_savings_and_investments > 40000:
+    error_message = "You do not qualify for legal aid, because your savings is more than $40000."
+    ineligible_screen
   else:
-    if applicant.age_in_years() < 60 and total_savings_and_investments > 10000:
-      ineligible_screen
-    if applicant.age_in_years() >= 60 and total_savings_and_investments > 40000:
-      ineligible_screen
-    else:
-      if PCHI > 950:
-        ineligible_screen
-      else:
-        eligible_screen
+    household_members.append(applicant)
 ---
 # DO NOT MODIFY THIS BLOCK OR MOVE IT
 mandatory: True
@@ -79,7 +81,15 @@ code: |
 # Use this block to write code that calculates the average PCHI
 mandatory: True
 code: |
-
+  total_household_income = 0
+  for x in household_members:
+    total_household_income = total_household_income + x.income
+  PCHI = total_household_income / (len(household_members)*12)
+  if PCHI > 950:
+    error_message = "You do not qualify for legal aid, because your per capita monthly household income exceeds the limit."
+    ineligible_screen
+  else:
+    eligible_screen
 ---
 question: |
   Do you own any property?" 
@@ -99,15 +109,25 @@ fields:
     datatype: currency
     min: 0
     show if: own_residency
+    help: |
+      Annual value of your house is the gross amount at which you can reasonably be expected to be let from year to year, when you pay for the expenses of repair, insurance, maintenance or upkeep and all taxes (other than goods and services tax). 
 ---
 question: |
   Savings Information
 fields: 
   - "Enter your birth date": applicant.birthdate
     datatype: date
-  - "How much total savings and investments did you have?": total_savings_and_investments
+  - "Enter your bank accounts savings (personal or joint)": bank_account_savings
     datatype: currency
     min: 0
+  - "Enter your overall value of shares in your Central Depository (CDP) account": cpf_savings
+    datatype: currency
+    min: 0
+  - "Enter your other financial/investment products with a cash value": other_investments
+    datatype: currency
+    min: 0
+    help: |
+      Other financial/investment products include things such as fixed deposit accounts at financial institutions, and shares, bonds and exchange traded funds aside from those in your CDP account.
 ---
 question: |
   Please enter your information. 
@@ -123,13 +143,19 @@ fields:
     address autocomplete: True
   - "Apartment Unit": applicant.address.apartment_unit
     required: False
-  - "Postcode": applicant.address.postcode
+  - "Postcode": applicant.address.zip
   - "Country": applicant.address.country
     code: |
       countries_list()
 ---
 question: |
-  Congratulations! You have passed the Means Test. 
+  Congratulations! You have passed the Means Test.
+subquestion: |  
+  Next, you will be given an appointment for **Statement Taking**. During the Statement Taking, a Legal Executive will ask you questions about your case. You should provide LAB with the full facts of your case as well as all the relevant documents/evidence. This helps LAB to investigate your case and assess whether legal aid should be granted to you.
+  
+  After your statement is taken, LAB will investigate your case and assess if legal aid should be granted to you. LAB will assess if you have reasonable grounds for bringing or defending a case in Court (“**the Merits Test**”), after we get a thorough understanding of your case.
+  
+  More information on the Merits Test can be found [here](https://lab.mlaw.gov.sg/legal-services/taking-the-merits-test/).
 event: eligible_screen
 buttons: 
   - Exit: exit
@@ -137,6 +163,8 @@ buttons:
 ---
 question: |
   Sorry but you do not qualify for legal assistance. 
+subquestion: |
+  ${ error_message }
 event: ineligible_screen
 buttons: 
   - Exit: exit
