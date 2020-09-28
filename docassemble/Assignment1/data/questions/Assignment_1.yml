@@ -70,6 +70,7 @@ code: |
     ineligible_screen
   else:
     household_members.append(applicant)
+# I included error messages which will be shown on the inelligble screen. Thus, the user will know why he or she does not qualify for legal aid. 
 ---
 # DO NOT MODIFY THIS BLOCK OR MOVE IT
 mandatory: True
@@ -128,6 +129,7 @@ fields:
     min: 0
     help: |
       Other financial/investment products include things such as fixed deposit accounts at financial institutions, and shares, bonds and exchange traded funds aside from those in your CDP account.
+# I break down savings and investments into various sources and provide some definitions to help user understand the questions. 
 ---
 question: |
   Please enter your information. 
@@ -141,6 +143,7 @@ fields:
     min: 0
   - "Street Number and Name": applicant.address.address
     address autocomplete: True
+# I added autocomplete so that users do not have to type everything.  
   - "Apartment Unit": applicant.address.apartment_unit
     required: False
   - "Postcode": applicant.address.zip
@@ -156,6 +159,7 @@ subquestion: |
   After your statement is taken, LAB will investigate your case and assess if legal aid should be granted to you. LAB will assess if you have reasonable grounds for bringing or defending a case in Court (“**the Merits Test**”), after we get a thorough understanding of your case.
   
   More information on the Merits Test can be found [here](https://lab.mlaw.gov.sg/legal-services/taking-the-merits-test/).
+# I provide users with the next step forward.   
 event: eligible_screen
 buttons: 
   - Exit: exit
