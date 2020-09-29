@@ -112,6 +112,7 @@ fields:
     show if: own_residency
     help: |
       Annual value of your house is the gross amount at which you can reasonably be expected to be let from year to year, when you pay for the expenses of repair, insurance, maintenance or upkeep and all taxes (other than goods and services tax). 
+# I include a definition of annual value so that users can easily understand the question. 
 ---
 question: |
   Savings Information
@@ -169,6 +170,7 @@ question: |
   Sorry but you do not qualify for legal assistance. 
 subquestion: |
   ${ error_message }
+# The error message defined above will appear here. 
 event: ineligible_screen
 buttons: 
   - Exit: exit
